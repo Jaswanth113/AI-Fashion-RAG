@@ -40,8 +40,7 @@ Key technologies:
 
 ## Dataset
 **H&M Fashion Caption Dataset**  
-- 20K+ fashion items with images and text descriptions  
-- Dataset URL: [Hugging Face Dataset](https://huggingface.co/datasets/tomytjandra/h-and-m-fashion-caption)  
+- 20K+ fashion items with images and text descriptions 
 
 ---
 
