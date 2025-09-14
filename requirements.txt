@@ -7,5 +7,6 @@ pandas
 Pillow
 requests
 datasets
+pyarrow
 groq
 python-dotenv
