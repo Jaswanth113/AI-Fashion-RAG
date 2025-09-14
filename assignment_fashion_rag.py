@@ -52,15 +52,16 @@ class FashionRAGPipeline:
     
     #limiting the images
     def load_dataset(self, limit=1000):
-        if self.dataset_path.exists():
-            with open(self.dataset_path, "rb") as f:
-                self.dataset = pickle.load(f)
-        else:
-            # Only load the first 'limit' items from the dataset
-            dataset = load_dataset("tomytjandra/h-and-m-fashion-caption", split=f"train[:{limit}]")
+        try:
+            dataset = load_dataset(
+                "tomytjandra/h-and-m-fashion-caption",
+                split=f"train[:{limit}]",
+                cache_dir=None  # Disable local cache
+            )
             self.dataset = dataset.to_pandas()
-            with open(self.dataset_path, "wb") as f:
-                pickle.dump(self.dataset, f)
+        except Exception as e:
+            print(f"Failed to load dataset: {e}")
+            self.dataset = pd.DataFrame(columns=["image", "text"])
 
     def generate_embeddings(self):
         if self.embeddings_path.exists():
