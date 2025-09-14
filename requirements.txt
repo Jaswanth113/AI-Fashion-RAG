@@ -1,9 +1,11 @@
-numpy<2
-pyarrow==12.0.0
-pandas
-datasets==2.16.1
-torch
-transformers
 streamlit
+torch
 clip
 faiss-cpu
+numpy
+pandas
+Pillow
+requests
+datasets
+groq
+python-dotenv
