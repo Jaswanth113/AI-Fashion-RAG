@@ -1,9 +1,9 @@
 numpy<2
-pyarrow
+pyarrow==12.0.0
 pandas
-datasets
+datasets==2.16.1
 torch
 transformers
 streamlit
 clip
-faiss
+faiss-cpu
