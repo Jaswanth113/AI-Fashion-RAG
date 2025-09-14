@@ -153,6 +153,7 @@ class FashionRAGPipeline:
         self.faiss_index = faiss.IndexFlatIP(dim)
         self.faiss_index.add(self.embeddings.astype(np.float32))
 
+
     def search_similar(self, query=None, image=None, top_k=5):
         if self.clip_model is None:
             self.load_clip_model()
