@@ -63,57 +63,95 @@ class FashionRAGPipeline:
             print(f"Failed to load dataset: {e}")
             self.dataset = pd.DataFrame(columns=["image", "text"])
 
+    # def generate_embeddings(self):
+    #     if self.embeddings_path.exists():
+    #         with open(self.embeddings_path, "rb") as f:
+    #             self.embeddings = pickle.load(f)
+    #         return
+
+    #     self.load_clip_model()
+    #     embeddings = []
+
+    #     for idx, row in self.dataset.iterrows():
+    #         text = row.get("text") or ""
+    #         text_tokens = clip.tokenize([text]).to(self.device)
+
+    #         with torch.no_grad():
+    #             text_emb = self.clip_model.encode_text(text_tokens).cpu().numpy()[0]
+
+    #         image_url = row.get("image") or None
+    #         if image_url:
+    #             try:
+    #                 img = Image.open(requests.get(image_url, stream=True).raw).convert("RGB")
+    #                 img_tensor = self.clip_preprocess(img).unsqueeze(0).to(self.device)
+    #                 with torch.no_grad():
+    #                     img_emb = self.clip_model.encode_image(img_tensor).cpu().numpy()[0]
+    #             except:
+    #                 img_emb = np.zeros_like(text_emb)
+    #         else:
+    #             img_emb = np.zeros_like(text_emb)
+
+    #         combined_emb = (text_emb + img_emb) / 2
+    #         embeddings.append(combined_emb)
+
+    #     self.embeddings = np.array(embeddings)
+    #     with open(self.embeddings_path, "wb") as f:
+    #         pickle.dump(self.embeddings, f)
+
+    # def build_faiss_index(self):
+    #     if self.index_path.exists():
+    #         with open(self.index_path, "rb") as f:
+    #             self.faiss_index = pickle.load(f)
+    #         return
+
+    #     if self.embeddings is None:
+    #         self.generate_embeddings()
+
+    #     faiss.normalize_L2(self.embeddings)
+    #     dim = self.embeddings.shape[1]
+    #     self.faiss_index = faiss.IndexFlatIP(dim)
+    #     self.faiss_index.add(self.embeddings.astype(np.float32))
+
+    #     with open(self.index_path, "wb") as f:
+    #         pickle.dump(self.faiss_index, f)
+
     def generate_embeddings(self):
-        if self.embeddings_path.exists():
-            with open(self.embeddings_path, "rb") as f:
-                self.embeddings = pickle.load(f)
-            return
+    self.load_clip_model()
+    embeddings = []
 
-        self.load_clip_model()
-        embeddings = []
+    for idx, row in self.dataset.iterrows():
+        text = row.get("text") or ""
+        text_tokens = clip.tokenize([text]).to(self.device)
 
-        for idx, row in self.dataset.iterrows():
-            text = row.get("text") or ""
-            text_tokens = clip.tokenize([text]).to(self.device)
+        with torch.no_grad():
+            text_emb = self.clip_model.encode_text(text_tokens).cpu().numpy()[0]
 
-            with torch.no_grad():
-                text_emb = self.clip_model.encode_text(text_tokens).cpu().numpy()[0]
-
-            image_url = row.get("image") or None
-            if image_url:
-                try:
-                    img = Image.open(requests.get(image_url, stream=True).raw).convert("RGB")
-                    img_tensor = self.clip_preprocess(img).unsqueeze(0).to(self.device)
-                    with torch.no_grad():
-                        img_emb = self.clip_model.encode_image(img_tensor).cpu().numpy()[0]
-                except:
-                    img_emb = np.zeros_like(text_emb)
-            else:
+        image_url = row.get("image") or None
+        if image_url:
+            try:
+                img = Image.open(requests.get(image_url, stream=True).raw).convert("RGB")
+                img_tensor = self.clip_preprocess(img).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    img_emb = self.clip_model.encode_image(img_tensor).cpu().numpy()[0]
+            except:
                 img_emb = np.zeros_like(text_emb)
+        else:
+            img_emb = np.zeros_like(text_emb)
 
-            combined_emb = (text_emb + img_emb) / 2
-            embeddings.append(combined_emb)
+        combined_emb = (text_emb + img_emb) / 2
+        embeddings.append(combined_emb)
 
-        self.embeddings = np.array(embeddings)
-        with open(self.embeddings_path, "wb") as f:
-            pickle.dump(self.embeddings, f)
+    self.embeddings = np.array(embeddings)
+
 
     def build_faiss_index(self):
-        if self.index_path.exists():
-            with open(self.index_path, "rb") as f:
-                self.faiss_index = pickle.load(f)
-            return
-
         if self.embeddings is None:
             self.generate_embeddings()
-
+    
         faiss.normalize_L2(self.embeddings)
         dim = self.embeddings.shape[1]
         self.faiss_index = faiss.IndexFlatIP(dim)
         self.faiss_index.add(self.embeddings.astype(np.float32))
-
-        with open(self.index_path, "wb") as f:
-            pickle.dump(self.faiss_index, f)
 
     def search_similar(self, query=None, image=None, top_k=5):
         if self.clip_model is None:
