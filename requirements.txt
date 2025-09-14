@@ -1,0 +1,12 @@
+streamlit
+torch
+transformers
+datasets==2.16.1
+pyarrow==12.0.1
+Pillow
+clip-anytorch
+faiss-cpu
+numpy
+pandas
+requests
+python-dotenv
