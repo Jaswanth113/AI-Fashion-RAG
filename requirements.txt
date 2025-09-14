@@ -1,5 +1,5 @@
 torch
-clip
+git+https://github.com/openai/CLIP.git
 faiss-cpu
 datasets==2.14.4
 pyarrow<11
