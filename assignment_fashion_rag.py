@@ -39,13 +39,25 @@ class FashionRAGPipeline:
     def load_clip_model(self):
         self.clip_model, self.clip_preprocess = clip.load("ViT-B/32", device=self.device)
 
+    # def load_dataset(self, limit=1000):
+    #     if self.dataset_path.exists():
+    #         with open(self.dataset_path, "rb") as f:
+    #             self.dataset = pickle.load(f)
+    #     else:
+    #         dataset = load_dataset("tomytjandra/h-and-m-fashion-caption", split="train")
+    #         dataset = dataset.select(range(min(limit, len(dataset))))
+    #         self.dataset = dataset.to_pandas()
+    #         with open(self.dataset_path, "wb") as f:
+    #             pickle.dump(self.dataset, f)
+    
+    #limiting the images
     def load_dataset(self, limit=1000):
         if self.dataset_path.exists():
             with open(self.dataset_path, "rb") as f:
                 self.dataset = pickle.load(f)
         else:
-            dataset = load_dataset("tomytjandra/h-and-m-fashion-caption", split="train")
-            dataset = dataset.select(range(min(limit, len(dataset))))
+            # Only load the first 'limit' items from the dataset
+            dataset = load_dataset("tomytjandra/h-and-m-fashion-caption", split=f"train[:{limit}]")
             self.dataset = dataset.to_pandas()
             with open(self.dataset_path, "wb") as f:
                 pickle.dump(self.dataset, f)
